@@ -15,13 +15,31 @@ using namespace std;
 void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 	std::cout << "hi from " << whichSolver << std::endl;
 
-	for(int y=1; y< _ny-1; ++y) {
-		for(int x=1; x < _nx-1; ++x) {
-			process9(x,y);
+	for (int iteration = 0; iteration < numIterations; ++iteration) {
+
+		double sumDiff2 = 0.0;
+		for(int y=1; y< _ny-1; ++y) {
+			for(int x=1; x < _nx-1; ++x) {
+				// with residuum calculation
+				double vold = val(x,y);
+
+				process9(x,y);
+
+				double diff = val(x,y) - vold;
+				double diff2 = diff * diff;
+
+				sumDiff2 += diff2;
+			}
+		}
+
+		cout << "iteration: " << iteration << " residuum square: " << sumDiff2 << endl;
+		if (iteration % vtkOutput == 0) {
+			cout << "Writing VTK output" << endl;
+			writeVTK(iteration);
 		}
 	}
 
-	writeVTK(10);
+	writeVTK(numIterations);
 }
 
 void GaussSeidel2D::boundaryConditions() {

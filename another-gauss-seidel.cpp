@@ -7,22 +7,30 @@
 //============================================================================
 
 #include "GaussSeidel2D.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <cstdlib>
+#include <iostream>
 
+using namespace std;
 
-int main(void) {
-	puts("Hodor!");
+int main(int argc, char* argv[]) {
 
-	int nx = 10, ny = 10;
-	int whichSolver = 0;
-	int numIterations = 10;
-	int vtkOutput = 1;
+	if (argc != 6) {
+		cout << "Wrong number of arguments. Expected 5, found: " << argc -1 << endl;
+		cout << "exiting." << endl;
+		return EXIT_FAILURE;
+	}
+
+	int nx = atoi(argv[1]);
+	int ny = atoi(argv[2]);
+	int whichSolver = atoi(argv[3]);
+	int numIterations = atoi(argv[4]);
+	int vtkOutput = atoi(argv[5]);
 
 	GaussSeidel2D gs2D = GaussSeidel2D(nx, ny);
 
 	gs2D.run(whichSolver, numIterations, vtkOutput);
 
-
+	cout << "Exiting with success." << endl;
 	return EXIT_SUCCESS;
 }
