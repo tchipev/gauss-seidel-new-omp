@@ -32,6 +32,8 @@ public:
 	}
 
 private:
+	void writeVTK(int iteration);
+
 	// methods
 	int ind(int x, int y) const {
 		return x + _nx * y;
