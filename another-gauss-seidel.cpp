@@ -16,10 +16,12 @@ int main(void) {
 
 	int nx = 200, ny = 200;
 	int whichSolver = 0;
+	int numIterations = 10;
+	int vtkOutput = 1;
 
 	GaussSeidel2D gs2D = GaussSeidel2D(nx, ny);
 
-	gs2D.run(whichSolver);
+	gs2D.run(whichSolver, numIterations, vtkOutput);
 
 
 	return EXIT_SUCCESS;

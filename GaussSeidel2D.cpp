@@ -9,6 +9,12 @@
 #include <iostream>
 
 
-void GaussSeidel2D::run(int whichSolver) {
+void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 	std::cout << "hi from " << whichSolver << std::endl;
+
+	for(int y=1; y< _ny-1; ++y) {
+		for(int x=1; x < _nx-1; ++x) {
+			process9(x,y);
+		}
+	}
 }
