@@ -14,7 +14,7 @@
 int main(void) {
 	puts("Hodor!");
 
-	int nx = 200, ny = 200;
+	int nx = 10, ny = 10;
 	int whichSolver = 0;
 	int numIterations = 10;
 	int vtkOutput = 1;

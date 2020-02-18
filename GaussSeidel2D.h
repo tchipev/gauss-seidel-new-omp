@@ -14,9 +14,9 @@ class GaussSeidel2D {
 public:
 	GaussSeidel2D(int nx, int ny) :_nx(nx), _ny(ny) {
 		_values.reserve(_nx * _ny);
-		_values.resize(_nx * _ny);
-		// initialize boundary conditions
-		// and initial conditions
+		_values.resize(_nx * _ny, 0.0);
+		boundaryConditions();
+		initialConditions();
 	}
 	~GaussSeidel2D() {
 	}
@@ -32,6 +32,9 @@ public:
 	}
 
 private:
+	void boundaryConditions();
+	void initialConditions();
+
 	void writeVTK(int iteration);
 
 	// methods
