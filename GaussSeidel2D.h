@@ -38,6 +38,8 @@ private:
 	void boundaryConditions(int vtkOutput);
 	void initialConditions(int vtkOutput);
 
+	void printInfo(int iterations, double timeSec) const;
+
 	void writeVTK(int iteration);
 
 	// methods

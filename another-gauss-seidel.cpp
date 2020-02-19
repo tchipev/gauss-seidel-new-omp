@@ -21,11 +21,17 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	int nx = atoi(argv[1]);
-	int ny = atoi(argv[2]);
-	int whichSolver = atoi(argv[3]);
+	int whichSolver = atoi(argv[1]);
+	int nx = atoi(argv[2]);
+	int ny = atoi(argv[3]);
 	int numIterations = atoi(argv[4]);
 	int vtkOutput = atoi(argv[5]);
+
+	if (vtkOutput <= 0) {
+		cout << "Program will not write VTK output and will write std out at every 10% of the progress." << endl;
+	} else {
+		cout << "Program will write VTK output every " << vtkOutput << " iterations and std out for every iteration." << endl;
+	}
 
 	GaussSeidel2D gs2D = GaussSeidel2D(nx, ny, vtkOutput);
 

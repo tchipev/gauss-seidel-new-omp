@@ -9,13 +9,17 @@
 #include <iostream>
 #include <fstream>   /* file io */
 #include <stdlib.h>  /* srand */
+#include <chrono>    /* steady_clock */
 
 using namespace std;
+using namespace std::chrono;
 
 void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
-	std::cout << "hi from " << whichSolver << std::endl;
+	steady_clock::time_point t1 = steady_clock::now();
 
-	for (int iteration = 0; iteration < numIterations; ++iteration) {
+	int tenPercentOfIterations = numIterations / 10;
+
+	for (int iteration = 1; iteration <= numIterations; ++iteration) {
 
 		double sumDiff2 = 0.0;
 		for(int y=1; y< _ny-1; ++y) {
@@ -32,7 +36,10 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 			}
 		}
 
-		cout << "iteration: " << iteration << " residuum square: " << sumDiff2 << endl;
+		if (vtkOutput > 0 or iteration % tenPercentOfIterations == 0) {
+			cout << "iteration: " << iteration << " residuum square: " << sumDiff2 << endl;
+		}
+
 		if (vtkOutput > 0 and iteration % vtkOutput == 0) {
 			cout << "Writing VTK output" << endl;
 			writeVTK(iteration);
@@ -42,6 +49,13 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 	if(vtkOutput > 0) {
 		writeVTK(numIterations);
 	}
+
+	steady_clock::time_point t2 = steady_clock::now();
+
+	// eclipse is an idiot?
+	double time = duration_cast<duration<double>>(t2 - t1).count();
+
+	printInfo(numIterations, time);
 }
 
 void GaussSeidel2D::boundaryConditions(int vtkOutput) {
@@ -82,6 +96,20 @@ void GaussSeidel2D::initialConditions(int vtkOutput) {
 	if(vtkOutput > 0) {
 		writeVTK(-1);
 	}
+}
+
+void GaussSeidel2D::printInfo(int iterations, double timeSec) const {
+	cout << "runtime: " << timeSec << endl;
+	cout << "number of iterations: " << iterations << endl;
+	double updatesPerSecond = iterations / timeSec;
+	long int gridpoints = ((_nx-1)*(_ny-1));
+	double millionGridpointUpdatesPerSecond = gridpoints * updatesPerSecond * 1.0e-6;
+	cout << "iterations per second: " << updatesPerSecond << endl;
+	cout << "million gridpoint updates per second: " << millionGridpointUpdatesPerSecond << endl;
+	long int bytes = (_nx * _ny) * sizeof(double);
+	cout << "total data size in  Bytes: " << bytes << endl;
+	cout << "total data size in KBytes: " << bytes /1000 << endl;
+	cout << "total data size in MBytes: " << bytes /1000000<< endl;
 }
 
 void GaussSeidel2D::writeVTK(int iteration) {
