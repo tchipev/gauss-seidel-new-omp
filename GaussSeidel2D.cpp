@@ -21,19 +21,14 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 
 	for (int iteration = 1; iteration <= numIterations; ++iteration) {
 
-		double sumDiff2 = 0.0;
-		for(int y=1; y< _ny-1; ++y) {
-			for(int x=1; x < _nx-1; ++x) {
-				// with residuum calculation
-				double vold = val(x,y);
-
-				process9(x,y);
-
-				double diff = val(x,y) - vold;
-				double diff2 = diff * diff;
-
-				sumDiff2 += diff2;
-			}
+		double sumDiff2;
+		switch(whichSolver) {
+		case 0:
+			sumDiff2 = basicTraversal();
+			break;
+		case 1:
+			sumDiff2 = slowTraversal();
+			break;
 		}
 
 		if (vtkOutput > 0 or iteration % tenPercentOfIterations == 0) {

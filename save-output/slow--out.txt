@@ -1,0 +1,20 @@
+./another-gauss-seidel 1 2000 2000 200 0
+Program will not write VTK output and will write std out at every 10% of the progress.
+iteration: 20 residuum square: 72.6547
+iteration: 40 residuum square: 24.8806
+iteration: 60 residuum square: 13.4325
+iteration: 80 residuum square: 8.69409
+iteration: 100 residuum square: 6.20925
+iteration: 120 residuum square: 4.71814
+iteration: 140 residuum square: 3.74136
+iteration: 160 residuum square: 3.06072
+iteration: 180 residuum square: 2.56415
+iteration: 200 residuum square: 2.18876
+runtime: 13.9157
+number of iterations: 200
+iterations per second: 14.3723
+million gridpoint updates per second: 57.4317
+total data size in  Bytes: 32000000
+total data size in KBytes: 32000
+total data size in MBytes: 32
+Exiting with success.

@@ -36,13 +36,13 @@ public:
 
 private:
 	void boundaryConditions(int vtkOutput);
+
 	void initialConditions(int vtkOutput);
 
 	void printInfo(int iterations, double timeSec) const;
 
 	void writeVTK(int iteration);
 
-	// methods
 	int ind(int x, int y) const {
 		return x + _nx * y;
 	}
@@ -72,6 +72,48 @@ private:
 	int _nx, _ny;
 
 	std::vector<double> _values;
+
+private:
+	// **** traversals **** //
+
+	// basic
+	double basicTraversal() {
+		double sumDiff2 = 0.0;
+		for(int y=1; y < _ny-1; ++y) {
+			for(int x=1; x < _nx-1; ++x) {
+				// with residuum calculation
+				double vold = val(x,y);
+
+				process9(x,y);
+
+				double diff = val(x,y) - vold;
+				double diff2 = diff * diff;
+
+				sumDiff2 += diff2;
+			}
+		}
+		return sumDiff2;
+	}
+
+	// slow
+	double slowTraversal() {
+		double sumDiff2 = 0.0;
+
+		for(int x=1; x < _nx-1; ++x) {
+			for(int y=1; y < _ny-1; ++y) {
+				// with residuum calculation
+				double vold = val(x,y);
+
+				process9(x,y);
+
+				double diff = val(x,y) - vold;
+				double diff2 = diff * diff;
+
+				sumDiff2 += diff2;
+			}
+		}
+		return sumDiff2;
+	}
 
 };
 
