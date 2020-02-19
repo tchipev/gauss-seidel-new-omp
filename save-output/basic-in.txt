@@ -1,0 +1,19 @@
+Program will not write VTK output and will write std out at every 10% of the progress.
+iteration: 20 residuum square: 73.046
+iteration: 40 residuum square: 24.9859
+iteration: 60 residuum square: 13.4807
+iteration: 80 residuum square: 8.72171
+iteration: 100 residuum square: 6.22716
+iteration: 120 residuum square: 4.7307
+iteration: 140 residuum square: 3.75066
+iteration: 160 residuum square: 3.06789
+iteration: 180 residuum square: 2.56985
+iteration: 200 residuum square: 2.1934
+runtime: 10.576
+number of iterations: 200
+iterations per second: 18.9108
+million gridpoint updates per second: 75.5675
+total data size in  Bytes: 32000000
+total data size in KBytes: 32000
+total data size in MBytes: 32
+Exiting with success.
