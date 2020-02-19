@@ -1,3 +1,4 @@
+./another-gauss-seidel 0 2000 2000 200 0
 Program will not write VTK output and will write std out at every 10% of the progress.
 iteration: 20 residuum square: 73.046
 iteration: 40 residuum square: 24.9859
