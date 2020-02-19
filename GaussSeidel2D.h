@@ -9,6 +9,7 @@
 #define GAUSSSEIDEL2D_H_
 
 #include <vector>
+#include <omp.h>
 
 class GaussSeidel2D {
 public:
@@ -110,6 +111,37 @@ private:
 				double diff2 = diff * diff;
 
 				sumDiff2 += diff2;
+			}
+		}
+		return sumDiff2;
+	}
+
+	// c08
+	double c08Traversal() {
+		double sumDiff2 = 0.0;
+		for (int colour = 0; colour < 4; ++colour) {
+
+			// colour 0: (1,1)
+			// colour 1: (2,1)
+			// colour 2: (1,2)
+			// colour 3: (2,2)
+
+			int startX = colour % 2 + 1;
+			int startY = colour / 2 + 1;
+
+			#pragma omp parallel for reduction(+:sumDiff2)
+			for(int y=startY; y < _ny-1; y += 2) {
+				for(int x=startX; x < _nx-1; x += 2) {
+					// with residuum calculation
+					double vold = val(x,y);
+
+					process9(x,y);
+
+					double diff = val(x,y) - vold;
+					double diff2 = diff * diff;
+
+					sumDiff2 += diff2;
+				}
 			}
 		}
 		return sumDiff2;

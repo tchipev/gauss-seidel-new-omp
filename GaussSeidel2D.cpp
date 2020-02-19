@@ -29,6 +29,9 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 		case 1:
 			sumDiff2 = slowTraversal();
 			break;
+		case 2:
+			sumDiff2 = c08Traversal();
+			break;
 		}
 
 		if (vtkOutput > 0 or iteration % tenPercentOfIterations == 0) {
