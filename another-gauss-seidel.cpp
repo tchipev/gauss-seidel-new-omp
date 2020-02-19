@@ -16,7 +16,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
 	if (argc != 6) {
-		cout << "Wrong number of arguments. Expected 5, found: " << argc -1 << endl;
+		cout << "Wrong number of arguments. Expected 5, found: " << argc - 1 << endl;
 		cout << "exiting." << endl;
 		return EXIT_FAILURE;
 	}
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 	int numIterations = atoi(argv[4]);
 	int vtkOutput = atoi(argv[5]);
 
-	GaussSeidel2D gs2D = GaussSeidel2D(nx, ny);
+	GaussSeidel2D gs2D = GaussSeidel2D(nx, ny, vtkOutput);
 
 	gs2D.run(whichSolver, numIterations, vtkOutput);
 

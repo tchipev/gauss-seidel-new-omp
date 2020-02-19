@@ -33,16 +33,18 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 		}
 
 		cout << "iteration: " << iteration << " residuum square: " << sumDiff2 << endl;
-		if (iteration % vtkOutput == 0) {
+		if (vtkOutput > 0 and iteration % vtkOutput == 0) {
 			cout << "Writing VTK output" << endl;
 			writeVTK(iteration);
 		}
 	}
 
-	writeVTK(numIterations);
+	if(vtkOutput > 0) {
+		writeVTK(numIterations);
+	}
 }
 
-void GaussSeidel2D::boundaryConditions() {
+void GaussSeidel2D::boundaryConditions(int vtkOutput) {
 	// left boundary 0, right boundary 1
 	for (int y = 0; y < _ny; ++y) {
 		val(0,y) = 0.0;
@@ -56,10 +58,13 @@ void GaussSeidel2D::boundaryConditions() {
 	for (int x = 0; x < _nx; ++x) {
 		val(x,_ny-1) = x * nx_inverse;
 	}
-	writeVTK(-2);
+
+	if(vtkOutput > 0) {
+		writeVTK(-2);
+	}
 }
 
-void GaussSeidel2D::initialConditions() {
+void GaussSeidel2D::initialConditions(int vtkOutput) {
 	// pi + rand[0,1]
 	// for fixed seed
 
@@ -74,7 +79,9 @@ void GaussSeidel2D::initialConditions() {
 		}
 	}
 
-	writeVTK(-1);
+	if(vtkOutput > 0) {
+		writeVTK(-1);
+	}
 }
 
 void GaussSeidel2D::writeVTK(int iteration) {

@@ -12,11 +12,14 @@
 
 class GaussSeidel2D {
 public:
-	GaussSeidel2D(int nx, int ny) :_nx(nx), _ny(ny) {
+	/**
+	 * @vtkOutput if a value <= 0 is passed, don't write files
+	 */
+	GaussSeidel2D(int nx, int ny, int vtkOutput) :_nx(nx), _ny(ny) {
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
-		boundaryConditions();
-		initialConditions();
+		boundaryConditions(vtkOutput);
+		initialConditions(vtkOutput);
 	}
 	~GaussSeidel2D() {
 	}
@@ -32,8 +35,8 @@ public:
 	}
 
 private:
-	void boundaryConditions();
-	void initialConditions();
+	void boundaryConditions(int vtkOutput);
+	void initialConditions(int vtkOutput);
 
 	void writeVTK(int iteration);
 
