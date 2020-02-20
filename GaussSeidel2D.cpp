@@ -18,6 +18,9 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 	steady_clock::time_point t1 = steady_clock::now();
 
 	int tenPercentOfIterations = numIterations / 10;
+	if (tenPercentOfIterations == 0) {
+		tenPercentOfIterations = 1;
+	}
 
 	for (int iteration = 1; iteration <= numIterations; ++iteration) {
 
@@ -31,6 +34,9 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 			break;
 		case 2:
 			sumDiff2 = c08Traversal();
+			break;
+		case 3:
+			sumDiff2 = c04_hcpTraversal();
 			break;
 		}
 
