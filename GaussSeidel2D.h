@@ -119,20 +119,16 @@ private:
 	// c08
 	double c08Traversal() {
 		double sumDiff2 = 0.0;
-		for (int colour = 0; colour < 4; ++colour) {
 
-			// colour 0: (1,1)
-			// colour 1: (2,1)
-			// colour 2: (1,2)
-			// colour 3: (2,2)
+		#pragma omp parallel reduction(+:sumDiff2)
+		for (int colour = 0; colour < 4; ++colour) {
 
 			int startX = colour % 2 + 1;
 			int startY = colour / 2 + 1;
 
-			#pragma omp parallel for reduction(+:sumDiff2)
+			#pragma omp for nowait collapse(2)
 			for(int y=startY; y < _ny-1; y += 2) {
 				for(int x=startX; x < _nx-1; x += 2) {
-					// with residuum calculation
 					double vold = val(x,y);
 
 					process9(x,y);
@@ -143,7 +139,11 @@ private:
 					sumDiff2 += diff2;
 				}
 			}
-		}
+			if(colour < 3) {
+				#pragma omp barrier
+			}
+		} /* end of for, end of parallel */
+
 		return sumDiff2;
 	}
 
