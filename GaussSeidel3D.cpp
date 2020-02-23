@@ -100,9 +100,39 @@ void GaussSeidel3D::boundaryConditions(int vtkOutput) {
 }
 
 void GaussSeidel3D::initialConditions(int vtkOutput) {
+	// pi + rand[0,1]
+	// for fixed seed
+
+	const int SEED = 42;
+	srand(SEED);
+
+	double rand_max_inv = 1.0 / RAND_MAX;
+
+	for(int z=1; z < _nz-1; ++z) {
+		for(int y=1; y< _ny-1; ++y) {
+			for(int x=1; x < _nx-1; ++x) {
+				val(x,y,z) = 3.14159265 + rand() * rand_max_inv;
+			}
+		}
+	}
+
+	if(vtkOutput > 0) {
+		writeVTK(-1);
+	}
 }
 
 void GaussSeidel3D::printInfo(int iterations, double timeSec) const {
+	cout << "runtime: " << timeSec << endl;
+	cout << "number of iterations: " << iterations << endl;
+	double updatesPerSecond = iterations / timeSec;
+	long int gridpoints = ((_nx-1)*(_ny-1)*(_nz-1));
+	double millionGridpointUpdatesPerSecond = gridpoints * updatesPerSecond * 1.0e-6;
+	cout << "iterations per second: " << updatesPerSecond << endl;
+	cout << "million gridpoint updates per second: " << millionGridpointUpdatesPerSecond << endl;
+	long int bytes = (_nx * _ny * _nz) * sizeof(double);
+	cout << "total data size in  Bytes: " << bytes << endl;
+	cout << "total data size in KBytes: " << bytes /1000 << endl;
+	cout << "total data size in MBytes: " << bytes /1000000<< endl;
 }
 
 void GaussSeidel3D::writeVTK(int iteration) {
