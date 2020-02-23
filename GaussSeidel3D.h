@@ -151,8 +151,6 @@ private:
 			if (colour < 7) {
 				#pragma omp barrier
 			}
-
-			writeVTK(1000+colour);
 		} /* end of for, end of parallel */
 
 		return sumDiff2;
