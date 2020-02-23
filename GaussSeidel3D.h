@@ -156,10 +156,62 @@ private:
 		return sumDiff2;
 	}
 
+	int myMod1(int x) {
+		int mod = x % 12;
+		int ret = mod;
+		switch(mod) {
+		case 10: /* FALLTHRU */
+		case 11:
+			ret = mod - 12;
+			break;
+		default:
+			break;
+		}
+		return ret;
+	}
+
+	int myMod2(int x) {
+		int mod = x % 12;
+		return mod < 10 ? mod : mod - 12;
+	}
+
+	int myMod3(int x) {
+	int mod = x % 12;
+	int div = mod / 10;
+	return mod - div * 12;
+}
+
+#if 0
 	// c04_hcp
+	double c04_hcpTraversal() {
+		double sumDiff2 = 0.0;
+
+		for (int colour = 0; colour < 4; ++colour) {
+
+	//		int startX[2][4][3] = {{{0,4,8},{3,7,-1},{6,-2,2}, {9,1,5}}};
+			for (int z = 1; z < _nz-1 ; ++z) {
+				for (int y = 1; y < _ny-1; y+=2) {
+
+					bool secondY = y+1 < _ny-1;
+
+					int startX = ((y%6)/2)*4 + (z % 2)*4 + colour * 3;
+					startX = myMod2(startX);
+
+					for (int x = startX; x < _nx-1; x+=12) {
+
+					}
+				}
+			}
+		}
+
+		return sumDiff2;
+	}
+#else
 	double c04_hcpTraversal() {
 		return 0.0;
 	}
+#endif
+
 };
 
 #endif /* GAUSSSEIDEL3D_H_ */
