@@ -101,12 +101,28 @@ private:
 
 	// basic
 	double basicTraversal() {
-		return 0.0;
+		double sumDiff2 = 0.0;
+		for (int z = 1; z < _nz-1; ++z) {
+			for (int y = 1; y < _ny-1; ++y) {
+				for (int x = 1; x < _nx-1; ++x) {
+					sumDiff2 += process27_residual(x,y,z);
+				}
+			}
+		}
+		return sumDiff2;
 	}
 
 	// slow
 	double slowTraversal() {
-		return 0.0;
+		double sumDiff2 = 0.0;
+		for (int x = 1; x < _nx-1; ++x) {
+			for (int y = 1; y < _ny-1; ++y) {
+				for (int z = 1; z < _nz-1; ++z) {
+					sumDiff2 += process27_residual(x,y,z);
+				}
+			}
+		}
+		return sumDiff2;
 	}
 
 	// c08
