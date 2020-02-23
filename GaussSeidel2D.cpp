@@ -56,7 +56,7 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 
 	steady_clock::time_point t2 = steady_clock::now();
 
-	// eclipse is an idiot?
+	// eclipse is not that smart?
 	double time = duration_cast<duration<double>>(t2 - t1).count();
 
 	printInfo(numIterations, time);

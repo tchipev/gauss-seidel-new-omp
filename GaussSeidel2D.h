@@ -27,14 +27,6 @@ public:
 
 	void run(int whichSolver, int numIterations, int vtkOutput);
 
-	int getNx() const {
-		return _nx;
-	}
-
-	int getNy() const {
-		return _ny;
-	}
-
 private:
 	void boundaryConditions(int vtkOutput);
 
@@ -46,10 +38,6 @@ private:
 
 	int ind(int x, int y) const {
 		return x + _nx * y;
-	}
-
-	int numValues() const {
-		return _nx * _ny;
 	}
 
 	void process9(int x, int y) {
