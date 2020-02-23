@@ -116,6 +116,7 @@ private:
 					sumDiff2 += process9_residual(x,y);
 				}
 			}
+
 			if(colour < 3) {
 				#pragma omp barrier
 			}

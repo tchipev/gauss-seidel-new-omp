@@ -103,7 +103,7 @@ private:
 	// UNSAFE OMP parallelization!
 	double basicTraversal() {
 		double sumDiff2 = 0.0;
-		#pragma omp parallel for reduction(+:sumDiff2) collapse(2)
+		#pragma omp parallel for reduction(+:sumDiff2) collapse(3)
 		for (int z = 1; z < _nz-1; ++z) {
 			for (int y = 1; y < _ny-1; ++y) {
 				for (int x = 1; x < _nx-1; ++x) {
@@ -118,7 +118,7 @@ private:
 	// UNSAFE OMP parallelization!
 	double slowTraversal() {
 		double sumDiff2 = 0.0;
-		#pragma omp parallel for reduction(+:sumDiff2) collapse(2)
+		#pragma omp parallel for reduction(+:sumDiff2) collapse(3)
 		for (int x = 1; x < _nx-1; ++x) {
 			for (int y = 1; y < _ny-1; ++y) {
 				for (int z = 1; z < _nz-1; ++z) {
@@ -131,7 +131,31 @@ private:
 
 	// c08
 	double c08Traversal() {
-		return 0.0;
+		double sumDiff2 = 0.0;
+
+		#pragma omp parallel reduction(+:sumDiff2)
+		for (int colour = 0; colour < 8; ++colour) {
+			int startX = colour % 2 + 1;
+			int startY = (colour / 2) % 2 + 1;
+			int startZ = colour / 4 + 1;
+
+			#pragma omp for nowait collapse(3)
+			for (int z=startZ; z < _nz-1; z+=2) {
+				for (int y=startY; y < _ny-1; y+=2) {
+					for (int x=startX; x < _nx-1; x+=2) {
+						sumDiff2 += process27_residual(x,y,z);
+					}
+				}
+			}
+
+			if (colour < 7) {
+				#pragma omp barrier
+			}
+
+			writeVTK(1000+colour);
+		} /* end of for, end of parallel */
+
+		return sumDiff2;
 	}
 
 	// c04_hcp
