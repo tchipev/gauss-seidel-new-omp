@@ -77,7 +77,7 @@ void GaussSeidel3D::boundaryConditions(int vtkOutput) {
 
 		// only two iterations in z loop
 
-		for (int y = 1; y < _ny-1; ++y) {
+		for (int y = 0; y < _ny; ++y) {
 			for (int x = 1; x < _nx-1; ++x) {
 				val(x,y,z) = x * nx_inverse;
 			}
@@ -85,7 +85,7 @@ void GaussSeidel3D::boundaryConditions(int vtkOutput) {
 	}
 
 	// front, back boundaries: linear interpolation
-	for (int z = 1; z < _nz-1; ++z) {
+	for (int z = 0; z < _nz; ++z) {
 		for (int y = 0; y < _ny; y+=_ny-1) {
 			// only two iterations in z loop
 			for (int x = 1; x < _nx-1; ++x) {
@@ -106,4 +106,28 @@ void GaussSeidel3D::printInfo(int iterations, double timeSec) const {
 }
 
 void GaussSeidel3D::writeVTK(int iteration) {
+	ofstream myfile;
+	string filename = "vtk/val_"+ to_string(iteration) + ".vtk";
+	myfile.open (filename);
+	myfile << "# vtk DataFile Version 2.0\n";
+	myfile << "volume example " << endl;
+	myfile << "ASCII " << endl;
+	myfile << "DATASET STRUCTURED_POINTS " << endl;
+	myfile << "DIMENSIONS " << _nx << " " << _ny << " " << _nz << "\n";
+	myfile << "ASPECT_RATIO 1 1 1 " << endl;
+	myfile << "ORIGIN 0 0 0 " << endl;
+	myfile << "POINT_DATA " << _nx * _ny * _nz << "\n";
+	myfile << "SCALARS volume_scalars double " << endl;
+	myfile << "LOOKUP_TABLE default " << endl;
+
+	for (int z = 0; z < _nz; ++z) {
+		for (int y = 0; y < _ny; ++y) {
+			for (int x = 0; x < _nx; ++x) {
+				myfile << val(x,y,z) << " ";
+			}
+			myfile << endl;
+		}
+	}
+
+	myfile.close();
 }
