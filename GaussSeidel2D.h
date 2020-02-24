@@ -189,6 +189,36 @@ private:
 		return sumDiff2;
 	}
 
+	double c04_hcpTraversal3() {
+		double sumDiff2 = 0.0;
+
+		#pragma omp parallel reduction(+:sumDiff2)
+		for (int col = 0; col < 3; ++col) {
+
+			#pragma omp for collapse(2)
+			for (int y = 1; y < _ny-1; ++y) {
+				for (int x = col * 2 + 1; x < _nx-1 + 3; x += 6) {
+					int xAccess = x;
+					if (y%2 == 0) {
+						xAccess -= 3;
+					}
+
+					if (xAccess > 0 and xAccess < _nx-1)
+						sumDiff2 += process9_residual(xAccess,y);
+
+					xAccess++;
+					if (xAccess > 0 and xAccess < _nx-1)
+						sumDiff2 += process9_residual(xAccess,y);
+				}
+			}
+			if(col < 2) {
+				#pragma omp barrier
+			}
+		}
+
+		return sumDiff2;
+	}
+
 };
 
 #endif /* GAUSSSEIDEL2D_H_ */

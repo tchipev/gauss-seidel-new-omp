@@ -182,6 +182,39 @@ private:
 }
 
 #if 0
+	// c04 data:
+	std::vector<std::pair<int,int>> _c04_indices;
+
+	void prepareIndices() {
+		for (int col = 0; col < 4; ++col) {
+
+			// TODO: account for boundaries
+			for (int z = 1; z < _nz-1; ++z) {
+
+				if (z % 2 == 0) {
+					// displaced plane
+				}
+				int startY;
+
+				for (int y = 1; y < _ny-1; ++y) {
+					int startX;
+					if (y % 2 == 0) {
+						startX = col * 2;
+					} else {
+						startX =
+					}
+
+					for (int x = startX; x < _nx; ++x) {
+
+					}
+				}
+
+			}
+
+		}
+	}
+
+
 	// c04_hcp
 	double c04_hcpTraversal() {
 		double sumDiff2 = 0.0;
