@@ -156,31 +156,6 @@ private:
 		return sumDiff2;
 	}
 
-	int myMod1(int x) {
-		int mod = x % 12;
-		int ret = mod;
-		switch(mod) {
-		case 10: /* FALLTHRU */
-		case 11:
-			ret = mod - 12;
-			break;
-		default:
-			break;
-		}
-		return ret;
-	}
-
-	int myMod2(int x) {
-		int mod = x % 12;
-		return mod < 10 ? mod : mod - 12;
-	}
-
-	int myMod3(int x) {
-	int mod = x % 12;
-	int div = mod / 10;
-	return mod - div * 12;
-}
-
 	double c04_hcpTraversal() {
 		double sumDiff2 = 0.0;
 
@@ -213,8 +188,6 @@ private:
 			if(col < 3) {
 				#pragma omp barrier
 			}
-
-			writeVTK(1000 + col);
 		} // end col
 		return sumDiff2;
 	}
