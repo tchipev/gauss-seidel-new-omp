@@ -241,7 +241,41 @@ private:
 	}
 #else
 	double c04_hcpTraversal() {
-		return 0.0;
+		double sumDiff2 = 0.0;
+
+//		#pragma omp parallel reduction(+:sumDiff2)
+		for (int col = 0; col < 4; ++col) {
+
+//			#pragma omp for collapse(3)
+			for (int z = 1; z < _nz-1; ++z) {
+				for (int y = 1; y < _ny-1 + 3; y += 2) {
+					for (int x = col * 3 + 1; x < _nx-1 + 8; x += 12) {
+
+						int yAccess = y + ((z-1)%2) * -3;
+
+						int xAccess = x + (((y-1)/2)%3) * -4;
+
+						for(int j = 0; j < 2; ++j) {
+							int Y = yAccess + j;
+							if (Y > 0 and Y < _ny-1) {
+								for (int i = 0; i < 3; ++i) {
+									int X = xAccess + i;
+									if (X > 0 and X <_nx-1) {
+										sumDiff2 += process27_residual(X, Y, z);
+									}
+								}
+							} // end i loop
+						} // end j loop
+					} // end x loop
+				} // end y loop
+			} // end z loop
+			if(col < 3) {
+//				#pragma omp barrier
+			}
+
+			writeVTK(1000 + col);
+		} // end col
+		return sumDiff2;
 	}
 #endif
 
