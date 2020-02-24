@@ -198,10 +198,7 @@ private:
 			#pragma omp for collapse(2)
 			for (int y = 1; y < _ny-1; ++y) {
 				for (int x = col * 2 + 1; x < _nx-1 + 3; x += 6) {
-					int xAccess = x;
-					if (y%2 == 0) {
-						xAccess -= 3;
-					}
+					int xAccess = x + ((y-1)%2) * -3;
 
 					if (xAccess > 0 and xAccess < _nx-1)
 						sumDiff2 += process9_residual(xAccess,y);
