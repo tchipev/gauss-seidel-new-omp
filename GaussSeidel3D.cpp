@@ -38,6 +38,9 @@ void GaussSeidel3D::run(int whichSolver, int numIterations, int vtkOutput) {
 		case 3:
 			sumDiff2 = c04_hcpTraversal();
 			break;
+		case 4:
+			sumDiff2 = c04_hcpTraversal_indices();
+			break;
 		}
 
 		if (vtkOutput > 0 or iteration % tenPercentOfIterations == 0) {

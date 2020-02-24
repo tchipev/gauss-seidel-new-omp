@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <omp.h>
+#include <array>
 
 class GaussSeidel3D {
 public:
@@ -19,6 +20,8 @@ public:
 		_values.resize(numValues, 0.0);
 		boundaryConditions(vtkOutput);
 		initialConditions(vtkOutput);
+
+		computeIndices();
 	}
 	~GaussSeidel3D() {
 		// TODO Auto-generated destructor stub
@@ -185,6 +188,63 @@ private:
 					} // end x loop
 				} // end y loop
 			} // end z loop
+			if(col < 3) {
+				#pragma omp barrier
+			}
+		} // end col
+		return sumDiff2;
+	}
+
+	std::vector<std::array<int,3>> _indices[4];
+	void computeIndices() {
+
+		for (int col = 0; col < 4; ++col) {
+
+			for (int z = 1; z < _nz-1; ++z) {
+				for (int y = 1; y < _ny-1 + 3; y += 2) {
+					for (int x = col * 3 + 1; x < _nx-1 + 8; x += 12) {
+
+						int yAccess = y + ((z-1)%2) * -3;
+
+						int xAccess = x + (((y-1)/2)%3) * -4;
+
+						std::array<int,3> temp = {xAccess, yAccess, z};
+
+						_indices[col].push_back(temp);
+					} // end x loop
+				} // end y loop
+			} // end z loop
+		} // end col
+	}
+
+	double c04_hcpTraversal_indices() {
+		double sumDiff2 = 0.0;
+
+		#pragma omp parallel reduction(+:sumDiff2)
+		for (int col = 0; col < 4; ++col) {
+
+			int iEnd = _indices[col].size();
+
+			#pragma omp for nowait
+			for (int i = 0; i < iEnd; ++i) {
+
+				int xAccess = _indices[col][i][0];
+				int yAccess = _indices[col][i][1];
+				int z = _indices[col][i][2];
+
+				for(int j = 0; j < 2; ++j) {
+					int Y = yAccess + j;
+					if (Y > 0 and Y < _ny-1) {
+						for (int i = 0; i < 3; ++i) {
+							int X = xAccess + i;
+							if (X > 0 and X <_nx-1) {
+								sumDiff2 += process27_residual(X, Y, z);
+							}
+						}
+					} // end i loop
+				} // end j loop
+			}
+
 			if(col < 3) {
 				#pragma omp barrier
 			}
