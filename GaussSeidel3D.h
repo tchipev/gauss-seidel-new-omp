@@ -162,7 +162,7 @@ private:
 		#pragma omp parallel reduction(+:sumDiff2)
 		for (int col = 0; col < 4; ++col) {
 
-			#pragma omp for collapse(3)
+			#pragma omp for nowait collapse(3)
 			for (int z = 1; z < _nz-1; ++z) {
 				for (int y = 1; y < _ny-1 + 3; y += 2) {
 					for (int x = col * 3 + 1; x < _nx-1 + 8; x += 12) {
