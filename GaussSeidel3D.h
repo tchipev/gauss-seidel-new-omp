@@ -181,72 +181,13 @@ private:
 	return mod - div * 12;
 }
 
-#if 0
-	// c04 data:
-	std::vector<std::pair<int,int>> _c04_indices;
-
-	void prepareIndices() {
-		for (int col = 0; col < 4; ++col) {
-
-			// TODO: account for boundaries
-			for (int z = 1; z < _nz-1; ++z) {
-
-				if (z % 2 == 0) {
-					// displaced plane
-				}
-				int startY;
-
-				for (int y = 1; y < _ny-1; ++y) {
-					int startX;
-					if (y % 2 == 0) {
-						startX = col * 2;
-					} else {
-						startX =
-					}
-
-					for (int x = startX; x < _nx; ++x) {
-
-					}
-				}
-
-			}
-
-		}
-	}
-
-
-	// c04_hcp
 	double c04_hcpTraversal() {
 		double sumDiff2 = 0.0;
 
-		for (int colour = 0; colour < 4; ++colour) {
-
-	//		int startX[2][4][3] = {{{0,4,8},{3,7,-1},{6,-2,2}, {9,1,5}}};
-			for (int z = 1; z < _nz-1 ; ++z) {
-				for (int y = 1; y < _ny-1; y+=2) {
-
-					bool secondY = y+1 < _ny-1;
-
-					int startX = ((y%6)/2)*4 + (z % 2)*4 + colour * 3;
-					startX = myMod2(startX);
-
-					for (int x = startX; x < _nx-1; x+=12) {
-
-					}
-				}
-			}
-		}
-
-		return sumDiff2;
-	}
-#else
-	double c04_hcpTraversal() {
-		double sumDiff2 = 0.0;
-
-//		#pragma omp parallel reduction(+:sumDiff2)
+		#pragma omp parallel reduction(+:sumDiff2)
 		for (int col = 0; col < 4; ++col) {
 
-//			#pragma omp for collapse(3)
+			#pragma omp for collapse(3)
 			for (int z = 1; z < _nz-1; ++z) {
 				for (int y = 1; y < _ny-1 + 3; y += 2) {
 					for (int x = col * 3 + 1; x < _nx-1 + 8; x += 12) {
@@ -270,14 +211,13 @@ private:
 				} // end y loop
 			} // end z loop
 			if(col < 3) {
-//				#pragma omp barrier
+				#pragma omp barrier
 			}
 
 			writeVTK(1000 + col);
 		} // end col
 		return sumDiff2;
 	}
-#endif
 
 };
 
