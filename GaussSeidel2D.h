@@ -277,6 +277,57 @@ private:
 		return sumDiff2;
 	}
 
+	double xFront(int xStart, int xEnd, int y) {
+		double sumDiff2 = 0.0;
+		for (int x = xStart; x < xEnd; ++x) {
+			sumDiff2 += process9_residual(x, y);
+		}
+		return sumDiff2;
+	}
+
+	double yFront(int yStart, int yEnd, int x) {
+		double sumDiff2 = 0.0;
+		for (int y = yStart; y < yEnd; ++y) {
+			sumDiff2 += process9_residual(x, y);
+		}
+		return sumDiff2;
+	}
+
+	double xyBlock(int xStart, int xEnd, int yStart, int yEnd) {
+		double sumDiff2 = 0.0;
+		for (int y = yStart; y < yEnd; ++y) {
+			for (int x = xStart; x < xEnd; ++x) {
+				sumDiff2 += process9_residual(x, y);
+			}
+		}
+		return sumDiff2;
+	}
+
+	double sli_blk() {
+		double sumDiff2 = 0.0;
+
+		#pragma omp parallel reduction(+:sumDiff2)
+		{
+			int xStart, xEnd, yStart, yEnd;
+
+			// acquire myH, myV
+
+			// blue front
+			sumDiff2 += xFront(xStart, xEnd/2, yStart);
+
+			// release myH
+
+			// blue block
+			sumDiff2 += xyBlock(xStart+1, xEnd, yStart, yEnd);
+
+			// acquire nbH
+
+			// green front
+
+		}
+		return sumDiff2;
+	}
+
 };
 
 #endif /* GAUSSSEIDEL2D_H_ */
