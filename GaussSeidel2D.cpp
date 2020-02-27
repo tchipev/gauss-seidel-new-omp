@@ -44,6 +44,9 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 		case 5:
 			sumDiff2 = c04_hcpTraversal3();
 			break;
+		case 6:
+			sumDiff2 = sli_1d();
+			break;
 		}
 
 		if (vtkOutput > 0 or iteration % tenPercentOfIterations == 0) {

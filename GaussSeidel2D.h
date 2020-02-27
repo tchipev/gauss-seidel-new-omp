@@ -10,13 +10,14 @@
 
 #include <vector>
 #include <omp.h>
+#include "Locks.h"
 
 class GaussSeidel2D {
 public:
 	/**
 	 * @vtkOutput if a value <= 0 is passed, don't write files
 	 */
-	GaussSeidel2D(int nx, int ny, int vtkOutput) :_nx(nx), _ny(ny) {
+	GaussSeidel2D(int nx, int ny, int vtkOutput) :_nx(nx), _ny(ny), _locks() {
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
 		boundaryConditions(vtkOutput);
@@ -72,6 +73,8 @@ private:
 	int _nx, _ny;
 
 	std::vector<double> _values;
+
+	Locks _locks;
 
 private:
 	// **** traversals **** //
@@ -211,6 +214,64 @@ private:
 			if(col < 2) {
 				#pragma omp barrier
 			}
+		}
+
+		return sumDiff2;
+	}
+
+	double sli_1d() {
+
+		double sumDiff2 = 0.0;
+
+		// determine max num threads that can be used
+		int numThreads;
+		#pragma omp parallel
+		{
+			#pragma omp master
+			numThreads = omp_get_num_threads();
+		}
+		int maxThreads = (_ny-2) / 2;
+		int actualThreads = std::min(maxThreads, numThreads);
+
+
+		#pragma omp parallel num_threads(actualThreads) reduction(+:sumDiff2)
+		{
+			int numThreads = omp_get_num_threads();
+			int myId = omp_get_thread_num();
+			int numCellsY = _ny-2;
+
+			int myStartY = numCellsY * myId / numThreads;
+			int myEndY = numCellsY * (myId + 1) / numThreads;
+
+			_locks.acquireLock(myId, Locks::MY_LOCK);
+
+			// process front boundary
+			int y = myStartY;
+			for (int x = 1; x < _nx -1 ; ++x) {
+				sumDiff2 += process9_residual(x,y+1);
+			}
+
+			_locks.releaseLock(myId, Locks::MY_LOCK);
+
+			// process bulk
+			for (int y = myStartY + 1; y < myEndY-1; ++y) {
+				for (int x = 1; x < _nx-1; ++x) {
+					sumDiff2 += process9_residual(x,y+1);
+				}
+			}
+
+			// acquire lock
+			_locks.acquireLock(myId, Locks::NEXT_LOCK);
+
+			// process back boundary
+			y = myEndY-1;
+			for (int x = 1; x < _nx -1 ; ++x) {
+				sumDiff2 += process9_residual(x,y+1);
+			}
+
+			// release lock
+			_locks.releaseLock(myId, Locks::NEXT_LOCK);
+
 		}
 
 		return sumDiff2;
