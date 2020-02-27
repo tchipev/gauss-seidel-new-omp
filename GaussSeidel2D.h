@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <omp.h>
+#include <array>
 #include "Locks.h"
 
 class GaussSeidel2D {
@@ -17,7 +18,9 @@ public:
 	/**
 	 * @vtkOutput if a value <= 0 is passed, don't write files
 	 */
-	GaussSeidel2D(int nx, int ny, int vtkOutput) :_nx(nx), _ny(ny), _locks() {
+	GaussSeidel2D(std::array<int, 2> N, std::array<int, 2> T, int vtkOutput) :
+		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _locks() {
+
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
 		boundaryConditions(vtkOutput);
@@ -71,6 +74,7 @@ private:
 private:
 	// fields
 	int _nx, _ny;
+	int _Tx, _Ty;
 
 	std::vector<double> _values;
 

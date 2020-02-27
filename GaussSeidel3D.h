@@ -14,7 +14,8 @@
 
 class GaussSeidel3D {
 public:
-	GaussSeidel3D(int nx, int ny, int nz, int vtkOutput) :_nx(nx), _ny(ny), _nz(nz) {
+	GaussSeidel3D(std::array<int, 3> N, std::array<int, 3> T, int vtkOutput) :
+		_nx(N[0]), _ny(N[1]), _nz(N[2]), _Tx(T[0]), _Ty(T[1]), _Tz(T[2]) {
 		int numValues = _nx * _ny * _nz;
 		_values.reserve(numValues);
 		_values.resize(numValues, 0.0);
@@ -96,6 +97,7 @@ private:
 private:
 	// fields
 	int _nx, _ny, _nz;
+	int _Tx, _Ty, _Tz;
 
 	std::vector<double> _values;
 
