@@ -46,34 +46,34 @@ private:
 
 	void process27(int x, int y, int z) {
 		double faceSum = val(x,y,z-1)
-					   + val(x,y,z+1)
 					   + val(x,y-1,z)
-					   + val(x,y+1,z)
 					   + val(x-1,y,z)
-					   + val(x+1,y,z);
+					   + val(x+1,y,z)
+					   + val(x,y+1,z)
+					   + val(x,y,z+1);
 
 		double edgeSum = val(x,y-1,z-1)
-					   + val(x,y+1,z-1)
 					   + val(x-1,y,z-1)
 					   + val(x+1,y,z-1)
+					   + val(x,y+1,z-1)
 
 					   + val(x-1,y-1,z)
-					   + val(x-1,y+1,z)
 					   + val(x+1,y-1,z)
+					   + val(x-1,y+1,z)
 					   + val(x+1,y+1,z)
 
 					   + val(x,y-1,z+1)
-					   + val(x,y+1,z+1)
 					   + val(x-1,y,z+1)
-					   + val(x+1,y,z+1);
+					   + val(x+1,y,z+1)
+					   + val(x,y+1,z+1);
 
 		double cornerSum = val(x-1,y-1,z-1)
-						 + val(x-1,y+1,z-1)
+						 + val(x+1,y-1,z-1)
 						 + val(x-1,y+1,z-1)
 						 + val(x+1,y+1,z-1)
 
 						 + val(x-1,y-1,z+1)
-						 + val(x-1,y+1,z+1)
+						 + val(x+1,y-1,z+1)
 						 + val(x-1,y+1,z+1)
 						 + val(x+1,y+1,z+1);
 		val(x,y,z) = (cornerSum + 3.0 * edgeSum + 14.0 * faceSum) * 0.0078125;
