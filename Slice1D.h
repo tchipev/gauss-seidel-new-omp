@@ -5,15 +5,15 @@
  *      Author: tchipevn
  */
 
-#ifndef LOCKS_H_
-#define LOCKS_H_
+#ifndef SLICE1D_H_
+#define SLICE1D_H_
 
 #include <vector>
 #include <omp.h>
 
-class Locks {
+class Slice1D {
 public:
-	Locks() {
+	Slice1D() {
 		int numThreads;
 
 		#pragma omp parallel
@@ -33,7 +33,7 @@ public:
 		omp_init_lock(_locks[0]);
 	}
 
-	~Locks() {
+	~Slice1D() {
 		#pragma omp parallel
 		{
 			int myId = omp_get_thread_num();
@@ -57,10 +57,30 @@ public:
 		omp_unset_lock(_locks[myId + l]);
 	}
 
-private:
+	/** note: this spans the space [0, numCells) */
+	static int getStart(int numCells, int numThreads, int threadId) {
+		return numCells * threadId / numThreads;
+	}
 
+	/** note: this spans the space [0, numCells) */
+	static int getEnd(int numCells, int numThreads, int threadId) {
+		return numCells * (threadId + 1) / numThreads;
+	}
+
+	/** the maximal number of threads ensuring two slices per thread */
+	static int getMaxThreads(int numGridpoints) {
+		return numGridpoints / 2;
+	}
+
+	/** the maximal usable number of threads */
+	static int getActualThreads(int numGridpoints, int ompNumThreads) {
+		return std::min(ompNumThreads, getMaxThreads(numGridpoints));
+	}
+
+
+private:
 	std::vector<omp_lock_t *> _locks;
 
 };
 
-#endif /* LOCKS_H_ */
+#endif /* SLICE1D_H_ */
