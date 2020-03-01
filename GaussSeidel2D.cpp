@@ -178,8 +178,8 @@ void GaussSeidel2D::printSchemeInfo(int solver) const {
 			assert(_Tx * _Ty == ompEnvNumThreads);
 		}
 		cout << "OMP_NUM_THREADS: " << ompEnvNumThreads << endl;
-		cout << "Scheme supports maximally " << _slice1dY.getMaxThreads(_ny-2) << " threads." << endl;
-		cout << "Will use: " << _slice1dY.getActualThreads(_ny-2, _Ty) << " threads."<< endl;
+		cout << "Scheme supports maximally " << _slice1dY.getMaxThreads() << " threads." << endl;
+		cout << "Will use: " << _slice1dY.getActualThreads() << " threads."<< endl;
 		break;
 	}
 

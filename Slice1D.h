@@ -13,35 +13,21 @@
 
 class Slice1D {
 public:
-	Slice1D() {
-		int numThreads;
+	Slice1D(int numThreads, int numGridpoints) :
+		_numThreads(numThreads), _numGridpoints(numGridpoints) {
+		_locks.resize(_numThreads+1, nullptr);
 
-		#pragma omp parallel
-		{
-			#pragma omp master
-			numThreads = omp_get_num_threads();
+		for (int i = 0; i < _numThreads + 1; ++i) {
+			_locks[i] = new omp_lock_t();
+			omp_init_lock(_locks[i]);
 		}
-		_locks.resize(numThreads+1, nullptr);
-
-		#pragma omp parallel
-		{
-			int myId = omp_get_thread_num();
-			_locks[myId+1] = new omp_lock_t();
-			omp_init_lock(_locks[myId+1]);
-		}
-		_locks[0] = new omp_lock_t();
-		omp_init_lock(_locks[0]);
 	}
 
 	~Slice1D() {
-		#pragma omp parallel
-		{
-			int myId = omp_get_thread_num();
-			omp_destroy_lock(_locks[myId+1]);
-			delete _locks[myId+1];
+		for (int i = 0; i < _numThreads + 1; ++i) {
+			omp_destroy_lock(_locks[i]);
+			delete _locks[i];
 		}
-		omp_destroy_lock(_locks[0]);
-		delete _locks[0];
 	}
 
 	enum LockType {
@@ -58,27 +44,29 @@ public:
 	}
 
 	/** note: this spans the space [0, numCells) */
-	static int getStart(int numCells, int numThreads, int threadId) {
-		return numCells * threadId / numThreads;
+	int getStart(int threadId) {
+		return _numGridpoints * threadId / _numThreads;
 	}
 
 	/** note: this spans the space [0, numCells) */
-	static int getEnd(int numCells, int numThreads, int threadId) {
-		return numCells * (threadId + 1) / numThreads;
+	int getEnd(int threadId) const {
+		return _numGridpoints * (threadId + 1) / _numThreads;
 	}
 
 	/** the maximal number of threads ensuring two slices per thread */
-	static int getMaxThreads(int numGridpoints) {
-		return numGridpoints / 2;
+	int getMaxThreads() const {
+		return _numGridpoints / 2;
 	}
 
 	/** the maximal usable number of threads */
-	static int getActualThreads(int numGridpoints, int ompNumThreads) {
-		return std::min(ompNumThreads, getMaxThreads(numGridpoints));
+	int getActualThreads() const {
+		return std::min(_numThreads, getMaxThreads());
 	}
 
 
 private:
+	int _numThreads;
+	int _numGridpoints;
 	std::vector<omp_lock_t *> _locks;
 
 };
