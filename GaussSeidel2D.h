@@ -20,7 +20,7 @@ public:
 	 * @vtkOutput if a value <= 0 is passed, don't write files
 	 */
 	GaussSeidel2D(std::array<int, 2> N, std::array<int, 2> T, int vtkOutput) :
-		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _slice1dY(_Ty, _ny-2) {
+		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _slice1dY() {
 
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
@@ -231,14 +231,16 @@ private:
 		double sumDiff2 = 0.0;
 
 		// determine max num threads that can be used
-		int actualThreads = _slice1dY.getActualThreads();
+		int numCellsY = _ny-2;
+		int actualThreads = _slice1dY.getActualThreads(numCellsY, _Ty);
 
 		#pragma omp parallel num_threads(actualThreads) reduction(+:sumDiff2)
 		{
+			int numThreads = omp_get_num_threads();
 			int myId = omp_get_thread_num();
 
-			int myStartY = _slice1dY.getStart(myId);
-			int myEndY = _slice1dY.getEnd(myId);
+			int myStartY = _slice1dY.getStart(numCellsY, numThreads, myId);
+			int myEndY = _slice1dY.getEnd(numCellsY, numThreads, myId);
 
 			_slice1dY.acquireLock(myId, Slice1D::MY_LOCK);
 
