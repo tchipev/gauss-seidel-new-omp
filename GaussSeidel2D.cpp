@@ -172,7 +172,7 @@ void GaussSeidel2D::printSchemeInfo(int solver) const {
 		break;
 	case 6:
 		cout << "Using 2D variant of sli: " << endl;
-		cout << "  slicing ONLY along Y dimension." << endl;
+		cout << "  slicing along Y dimension." << endl;
 		if (_Tx * _Ty != ompEnvNumThreads) {
 			cout << "Thread arguments and env var mismatch!" << endl;
 			assert(_Tx * _Ty == ompEnvNumThreads);
@@ -180,10 +180,6 @@ void GaussSeidel2D::printSchemeInfo(int solver) const {
 		cout << "OMP_NUM_THREADS: " << ompEnvNumThreads << endl;
 		cout << "Scheme supports maximally " << _slice1dY.getMaxThreads() << " threads." << endl;
 		cout << "Will use: " << _slice1dY.getActualThreads() << " threads."<< endl;
-		break;
-	case 7:
-		assert(_Tx == _slice1dX.getActualThreads());
-		assert(_Ty == _slice1dY.getActualThreads());
 		break;
 	}
 

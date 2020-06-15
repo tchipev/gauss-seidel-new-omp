@@ -20,7 +20,7 @@ public:
 	 * @vtkOutput if a value <= 0 is passed, don't write files
 	 */
 	GaussSeidel2D(std::array<int, 2> N, std::array<int, 2> T, int vtkOutput) :
-		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _slice1dX(_Tx, _nx-2), _slice1dY(_Ty, _ny-2) {
+		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _slice1dY(_Ty, _ny-2) {
 
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
@@ -81,7 +81,7 @@ private:
 
 	std::vector<double> _values;
 
-	Slice1D _slice1dX, _slice1dY;
+	Slice1D _slice1dY;
 
 private:
 	// **** traversals **** //
@@ -277,7 +277,7 @@ private:
 	double xFront(int xStart, int xEnd, int y) {
 		double sumDiff2 = 0.0;
 		for (int x = xStart; x < xEnd; ++x) {
-			sumDiff2 += process9_residual(x+1, y+1);
+			sumDiff2 += process9_residual(x, y);
 		}
 		return sumDiff2;
 	}
@@ -285,7 +285,7 @@ private:
 	double yFront(int yStart, int yEnd, int x) {
 		double sumDiff2 = 0.0;
 		for (int y = yStart; y < yEnd; ++y) {
-			sumDiff2 += process9_residual(x+1, y+1);
+			sumDiff2 += process9_residual(x, y);
 		}
 		return sumDiff2;
 	}
@@ -294,77 +294,34 @@ private:
 		double sumDiff2 = 0.0;
 		for (int y = yStart; y < yEnd; ++y) {
 			for (int x = xStart; x < xEnd; ++x) {
-				sumDiff2 += process9_residual(x+1, y+1);
+				sumDiff2 += process9_residual(x, y);
 			}
 		}
 		return sumDiff2;
 	}
 
-	int getMyIdX(int ompThreadNum) const {
-		return ompThreadNum % _Tx;
-	}
-
-	int getMyIdY(int ompThreadNum) const {
-		return ompThreadNum / _Tx;
-	}
-
 	double sli_blk() {
-
 		double sumDiff2 = 0.0;
-
-		// determine max num threads that can be used
-//		int actualThreadsX = _slice1dX.getActualThreads();
-//		int actualThreadsY = _slice1dY.getActualThreads();
-//		int totalActualThreads = actualThreadsX * actualThreadsY;
-
-		// NOTE NOTE NOTE:
-		// the following code ASSUMES
-		// that the actual threads are the same as the specified ones in _Tx and _Ty!
 
 		#pragma omp parallel reduction(+:sumDiff2)
 		{
-			int myIdX, myIdY;
-			{
-				int myId = omp_get_thread_num();
-				myIdX = getMyIdX(myId);
-				myIdY = getMyIdY(myId);
-			}
+			int xStart, xEnd, yStart, yEnd;
 
-			int myStartX = _slice1dX.getStart(myIdX);
-			int myEndX = _slice1dX.getEnd(myIdX);
-			int myMidX = (myStartX + myEndX) / 2;
+			// acquire myH, myV
 
-			int myStartY = _slice1dY.getStart(myIdY);
-			int myEndY = _slice1dY.getEnd(myIdY);
-			int myMidY = (myStartY + myEndY) / 2;
+			// blue front
+			sumDiff2 += xFront(xStart, xEnd/2, yStart);
 
-			_slice1dX.acquireLock(myIdX, Slice1D::MY_LOCK);
-			_slice1dY.acquireLock(myIdY, Slice1D::MY_LOCK);
+			// release myH
 
-			// process blue boundary
-			sumDiff2 += yFront(myStartY, myMidY, myStartX);
+			// blue block
+			sumDiff2 += xyBlock(xStart+1, xEnd, yStart, yEnd);
 
-			_slice1dX.releaseLock(myIdX, Slice1D::MY_LOCK);
+			// acquire nbH
 
-			// process blue bulk
-			sumDiff2 += xyBlock(myStartX+1, myMidX, myStartY, myMidY);
-
-			_slice1dX.acquireLock(myIdX, Slice1D::NEXT_LOCK);
-
-			// process green boundary
-			sumDiff2 += xFront(myMidX+1, myEndX, myStartY);
-
-			_slice1dY.releaseLock(myIdY, Slice1D::MY_LOCK);
-
-			// process green bulk
-			sumDiff2 += xyBlock(myMidX+1, myEndX, myStartY+1, myMidY);
-
-			// WRONG!
-			// I NEED MORE LOCKS!
-			// right now there are O(_Tx + _Ty) locks, but I need O(_Tx * _Ty) locks!
+			// green front
 
 		}
-
 		return sumDiff2;
 	}
 
