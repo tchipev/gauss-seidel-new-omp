@@ -11,8 +11,7 @@
 #include <vector>
 #include <omp.h>
 #include <array>
-
-#include "Slice1D.h"
+#include "Locks.h"
 
 class GaussSeidel2D {
 public:
@@ -20,7 +19,7 @@ public:
 	 * @vtkOutput if a value <= 0 is passed, don't write files
 	 */
 	GaussSeidel2D(std::array<int, 2> N, std::array<int, 2> T, int vtkOutput) :
-		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _slice1dY() {
+		_nx(N[0]), _ny(N[1]), _Tx(T[0]), _Ty(T[1]), _locks() {
 
 		_values.reserve(_nx * _ny);
 		_values.resize(_nx * _ny, 0.0);
@@ -38,8 +37,6 @@ private:
 	void initialConditions(int vtkOutput);
 
 	void printInfo(int iterations, double timeSec) const;
-
-	void printSchemeInfo(int solver) const;
 
 	void writeVTK(int iteration);
 
@@ -81,7 +78,7 @@ private:
 
 	std::vector<double> _values;
 
-	Slice1D _slice1dY;
+	Locks _locks;
 
 private:
 	// **** traversals **** //
@@ -226,23 +223,31 @@ private:
 		return sumDiff2;
 	}
 
-	double sli_along_y() {
+	double sli_1d() {
 
 		double sumDiff2 = 0.0;
 
 		// determine max num threads that can be used
-		int numCellsY = _ny-2;
-		int actualThreads = _slice1dY.getActualThreads(numCellsY, _Ty);
+		int numThreads;
+		#pragma omp parallel
+		{
+			#pragma omp master
+			numThreads = omp_get_num_threads();
+		}
+		int maxThreads = (_ny-2) / 2;
+		int actualThreads = std::min(maxThreads, numThreads);
+
 
 		#pragma omp parallel num_threads(actualThreads) reduction(+:sumDiff2)
 		{
 			int numThreads = omp_get_num_threads();
 			int myId = omp_get_thread_num();
+			int numCellsY = _ny-2;
 
-			int myStartY = _slice1dY.getStart(numCellsY, numThreads, myId);
-			int myEndY = _slice1dY.getEnd(numCellsY, numThreads, myId);
+			int myStartY = numCellsY * myId / numThreads;
+			int myEndY = numCellsY * (myId + 1) / numThreads;
 
-			_slice1dY.acquireLock(myId, Slice1D::MY_LOCK);
+			_locks.acquireLock(myId, Locks::MY_LOCK);
 
 			// process front boundary
 			int y = myStartY;
@@ -250,7 +255,7 @@ private:
 				sumDiff2 += process9_residual(x,y+1);
 			}
 
-			_slice1dY.releaseLock(myId, Slice1D::MY_LOCK);
+			_locks.releaseLock(myId, Locks::MY_LOCK);
 
 			// process bulk
 			for (int y = myStartY + 1; y < myEndY-1; ++y) {
@@ -260,7 +265,7 @@ private:
 			}
 
 			// acquire lock
-			_slice1dY.acquireLock(myId, Slice1D::NEXT_LOCK);
+			_locks.acquireLock(myId, Locks::NEXT_LOCK);
 
 			// process back boundary
 			y = myEndY-1;
@@ -269,7 +274,7 @@ private:
 			}
 
 			// release lock
-			_slice1dY.releaseLock(myId, Slice1D::NEXT_LOCK);
+			_locks.releaseLock(myId, Locks::NEXT_LOCK);
 
 		}
 

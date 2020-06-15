@@ -10,21 +10,18 @@
 #include <fstream>   /* file io */
 #include <stdlib.h>  /* srand */
 #include <chrono>    /* steady_clock */
-#include <cassert>
 
 using namespace std;
 using namespace std::chrono;
 
 void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
-
-	printSchemeInfo(whichSolver);
+	steady_clock::time_point t1 = steady_clock::now();
 
 	int tenPercentOfIterations = numIterations / 10;
 	if (tenPercentOfIterations == 0) {
 		tenPercentOfIterations = 1;
 	}
 
-	steady_clock::time_point t1 = steady_clock::now();
 	for (int iteration = 1; iteration <= numIterations; ++iteration) {
 
 		double sumDiff2;
@@ -48,7 +45,7 @@ void GaussSeidel2D::run(int whichSolver, int numIterations, int vtkOutput) {
 			sumDiff2 = c04_hcpTraversal3();
 			break;
 		case 6:
-			sumDiff2 = sli_along_y();
+			sumDiff2 = sli_1d();
 			break;
 		}
 
@@ -126,64 +123,6 @@ void GaussSeidel2D::printInfo(int iterations, double timeSec) const {
 	cout << "total data size in  Bytes: " << bytes << endl;
 	cout << "total data size in KBytes: " << bytes /1000 << endl;
 	cout << "total data size in MBytes: " << bytes /1000000<< endl;
-}
-
-void GaussSeidel2D::printSchemeInfo(int solver) const {
-
-	int ompEnvNumThreads;
-	#pragma omp parallel
-	{
-		#pragma omp master
-		ompEnvNumThreads = omp_get_num_threads();
-	}
-
-	cout << "SOLVER INFO: " << endl;
-	switch(solver) {
-	case 0:
-		cout << "Using basic traversal:" << endl;
-		cout << "  iterating over the dimensions in the normal fashion: for(y) {for(x) {}}." << endl;
-		cout << "Unsafe OpenMP parallelization!" << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 1:
-		cout << "Using basic traversal:" << endl;
-		cout << "  but iterating over the dimensions in a SLOW fashion: for(x) {for(y) {}}." << endl;
-		cout << "Unsafe OpenMP parallelization!" << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 2:
-		cout << "Using 2D variant of c08." << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 3:
-		cout << "Using suboptimal 2D variant of c04 (3 colours):" << endl;
-		cout << "  only outer loop is parallelized." << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 4:
-		cout << "Using 2D variant of c04 (3 colours): " << endl;
-		cout << "  both loops parallelized. Variant 1. " << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 5:
-		cout << "Using 2D variant of c04 (3 colours): " << endl;
-		cout << "  both loops parallelized. Variant 2. " << endl;
-		cout << "Will use: " << ompEnvNumThreads << " threads."<< endl;
-		break;
-	case 6:
-		cout << "Using 2D variant of sli: " << endl;
-		cout << "  slicing along Y dimension." << endl;
-		if (_Tx * _Ty != ompEnvNumThreads) {
-			cout << "Thread arguments and env var mismatch!" << endl;
-			assert(_Tx * _Ty == ompEnvNumThreads);
-		}
-		cout << "OMP_NUM_THREADS: " << ompEnvNumThreads << endl;
-		cout << "Scheme supports maximally " << _slice1dY.getMaxThreads(_ny-2) << " threads." << endl;
-		cout << "Will use: " << _slice1dY.getActualThreads(_ny-2, _Ty) << " threads."<< endl;
-		break;
-	}
-
-	cout << endl;
 }
 
 void GaussSeidel2D::writeVTK(int iteration) {
